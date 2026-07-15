@@ -42,7 +42,8 @@
       "init": {
         "title": "Carrier Infinity: Configuration",
         "data": {
-          "infinite_holds": "Holds are infinite, when off holds are until next scheduled activity"
+          "infinite_holds": "Holds are infinite, when off holds are until next scheduled activity",
+          "force_all_hvac_modes": "Force all HVAC modes (ignore reported capabilities) - only enable if your equipment supports modes that are missing"
         }
       }
     }

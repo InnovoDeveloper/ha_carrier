@@ -27,7 +27,13 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import ConfigEntryCarrier
 from .carrier_data_update_coordinator import CarrierDataUpdateCoordinator
 from .carrier_entity import CarrierZoneEntity
-from .const import CONF_INFINITE_HOLDS, DEFAULT_INFINITE_HOLDS, FAN_AUTO
+from .const import (
+    CONF_FORCE_ALL_HVAC_MODES,
+    CONF_INFINITE_HOLDS,
+    DEFAULT_FORCE_ALL_HVAC_MODES,
+    DEFAULT_INFINITE_HOLDS,
+    FAN_AUTO,
+)
 from .entry_level_climate import build_entry_level_entities
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -54,24 +60,43 @@ async def async_setup_entry(
     """
     _LOGGER.debug("setting up climate entry")
     infinite_hold = config_entry.options.get(CONF_INFINITE_HOLDS, DEFAULT_INFINITE_HOLDS)
+    force_all_hvac_modes = config_entry.options.get(
+        CONF_FORCE_ALL_HVAC_MODES, DEFAULT_FORCE_ALL_HVAC_MODES
+    )
     coordinator = config_entry.runtime_data
     entities: list[Thermostat] = []
     for carrier_system in coordinator.systems:
         support_flags = BASE_SUPPORT_FLAGS
         supported_hvac_capabilities = carrier_system.supported_hvac_capabilities()
-        hvac_modes: list[HVACMode] = [
-            HVACMode.OFF,
-        ]
-        if supported_hvac_capabilities["fan"]:
+        if force_all_hvac_modes:
+            _LOGGER.debug(
+                "%s: forcing full HVAC mode set, reported capabilities %s ignored",
+                carrier_system.profile.serial,
+                supported_hvac_capabilities,
+            )
             support_flags |= ClimateEntityFeature.FAN_MODE
-            hvac_modes.append(HVACMode.FAN_ONLY)
-        if supported_hvac_capabilities["cool"]:
-            hvac_modes.append(HVACMode.COOL)
-        if supported_hvac_capabilities["heat"]:
-            hvac_modes.append(HVACMode.HEAT)
-        if supported_hvac_capabilities["cool"] and supported_hvac_capabilities["heat"]:
             support_flags |= ClimateEntityFeature.TARGET_TEMPERATURE_RANGE
-            hvac_modes.append(HVACMode.HEAT_COOL)
+            hvac_modes = [
+                HVACMode.OFF,
+                HVACMode.FAN_ONLY,
+                HVACMode.COOL,
+                HVACMode.HEAT,
+                HVACMode.HEAT_COOL,
+            ]
+        else:
+            hvac_modes = [
+                HVACMode.OFF,
+            ]
+            if supported_hvac_capabilities["fan"]:
+                support_flags |= ClimateEntityFeature.FAN_MODE
+                hvac_modes.append(HVACMode.FAN_ONLY)
+            if supported_hvac_capabilities["cool"]:
+                hvac_modes.append(HVACMode.COOL)
+            if supported_hvac_capabilities["heat"]:
+                hvac_modes.append(HVACMode.HEAT)
+            if supported_hvac_capabilities["cool"] and supported_hvac_capabilities["heat"]:
+                support_flags |= ClimateEntityFeature.TARGET_TEMPERATURE_RANGE
+                hvac_modes.append(HVACMode.HEAT_COOL)
         entities.extend(
             Thermostat(
                 coordinator=coordinator,
