@@ -13,8 +13,10 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 
 from .const import (
+    CONF_FORCE_ALL_HVAC_MODES,
     CONF_INFINITE_HOLDS,
     CONFIG_FLOW_VERSION,
+    DEFAULT_FORCE_ALL_HVAC_MODES,
     DEFAULT_INFINITE_HOLDS,
     DOMAIN,
     ERROR_AUTH,
@@ -327,6 +329,12 @@ class CarrierOptionsFlow(OptionsFlow):
                 vol.Required(
                     CONF_INFINITE_HOLDS,
                     default=config_entry.options.get(CONF_INFINITE_HOLDS, DEFAULT_INFINITE_HOLDS),
+                ): cv.boolean,
+                vol.Required(
+                    CONF_FORCE_ALL_HVAC_MODES,
+                    default=config_entry.options.get(
+                        CONF_FORCE_ALL_HVAC_MODES, DEFAULT_FORCE_ALL_HVAC_MODES
+                    ),
                 ): cv.boolean,
             }
         )

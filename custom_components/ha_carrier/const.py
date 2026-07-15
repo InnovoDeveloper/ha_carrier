@@ -19,6 +19,14 @@ PLATFORMS: list[Platform] = [
 CONF_INFINITE_HOLDS: str = "infinite_holds"
 DEFAULT_INFINITE_HOLDS: bool = True
 
+# Innovo fork: some Carrier accounts report energyConfig capability flags
+# (cooling/hpheat/fan "enabled") as false on systems whose equipment is
+# actually capable, which hides cool/heat/heat_cool/fan_only from the UI.
+# When enabled, ignore the reported capabilities and expose the full mode set.
+# Defaults to False so behaviour matches upstream unless deliberately turned on.
+CONF_FORCE_ALL_HVAC_MODES: str = "force_all_hvac_modes"
+DEFAULT_FORCE_ALL_HVAC_MODES: bool = False
+
 FAN_AUTO = "auto"
 
 TO_REDACT: set[str] = {CONF_USERNAME, CONF_PASSWORD, CONF_UNIQUE_ID}
