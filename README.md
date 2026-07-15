@@ -1,3 +1,22 @@
+> ### Innovo fork
+>
+> This is a fork of [dahlb/ha_carrier](https://github.com/dahlb/ha_carrier)
+> maintained by Innovo. It tracks upstream and adds one option:
+>
+> **Force all HVAC modes** (default: **off**) — some Carrier accounts report
+> `energyConfig` capability flags (`cooling` / `hpheat` / `fan` `enabled`) as
+> `false` on systems whose equipment is actually capable, which hides
+> `cool` / `heat` / `heat_cool` / `fan_only` from the UI. Enabling this option
+> ignores the reported capabilities and exposes the full mode set.
+>
+> Only enable it if you have confirmed the equipment really supports the
+> missing modes — for genuinely heat-only equipment, upstream's default is
+> correct. Configure it under Settings -> Devices & Services -> Carrier
+> Infinity -> Configure.
+>
+> Versions are tagged `<upstream>+innovo.<n>`. Upstream issues should go to
+> the upstream repository, not this fork.
+
 
 [![Usage][usage-shield]][releases]
 [![GitHub Release][releases-shield]][releases]
