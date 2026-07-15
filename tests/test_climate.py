@@ -29,7 +29,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.util.unit_system import US_CUSTOMARY_SYSTEM
 import pytest
 
-from custom_components.ha_carrier.const import FAN_AUTO
+from custom_components.ha_carrier.const import CONF_FORCE_ALL_HVAC_MODES, FAN_AUTO
 
 from .conftest import FakeCarrierApiConnection, build_carrier_system, entity_id_for_unique_id
 
@@ -68,6 +68,31 @@ async def test_climate_platform_uses_config_fan_capability(
     assert "fan_mode" not in state.attributes
     assert "fan_modes" not in state.attributes
     assert HVACMode.FAN_ONLY not in state.attributes["hvac_modes"]
+
+
+@pytest.mark.asyncio
+async def test_climate_platform_force_all_hvac_modes_overrides_capabilities(
+    hass: HomeAssistant,
+    carrier_api: FakeCarrierApiConnection,
+    setup_integration: Callable[..., Any],
+) -> None:
+    """Expose the full mode set when force_all_hvac_modes is enabled.
+
+    Some Carrier accounts report capability flags as disabled on equipment that
+    is actually capable; the option ignores those flags.
+    """
+    carrier_api.systems = [build_carrier_system(fan_enabled=False)]
+
+    await setup_integration(options={CONF_FORCE_ALL_HVAC_MODES: True})
+    entity_id = entity_id_for_unique_id(hass, CLIMATE_DOMAIN, "abc123_zone_1_thermostat")
+    state = hass.states.get(entity_id)
+
+    assert state is not None
+    # Reported fan_enabled=False must be ignored when the option is on.
+    assert HVACMode.FAN_ONLY in state.attributes["hvac_modes"]
+    assert FAN_AUTO in state.attributes["fan_modes"]
+    for mode in (HVACMode.OFF, HVACMode.COOL, HVACMode.HEAT, HVACMode.HEAT_COOL):
+        assert mode in state.attributes["hvac_modes"]
 
 
 @pytest.mark.asyncio

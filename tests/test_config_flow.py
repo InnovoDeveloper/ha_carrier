@@ -18,7 +18,9 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.ha_carrier import config_flow
 from custom_components.ha_carrier.const import (
+    CONF_FORCE_ALL_HVAC_MODES,
     CONF_INFINITE_HOLDS,
+    DEFAULT_FORCE_ALL_HVAC_MODES,
     DOMAIN,
     ERROR_AUTH,
     ERROR_CANNOT_CONNECT,
@@ -346,7 +348,10 @@ async def test_options_flow_updates_infinite_hold_option(hass: HomeAssistant) ->
     )
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["data"] == {CONF_INFINITE_HOLDS: False}
+    assert result["data"] == {
+        CONF_INFINITE_HOLDS: False,
+        CONF_FORCE_ALL_HVAC_MODES: DEFAULT_FORCE_ALL_HVAC_MODES,
+    }
 
 
 def test_reauth_confirm_returns_unknown_when_validated_identity_is_missing(
